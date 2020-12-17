@@ -5,42 +5,41 @@ import (
 	"time"
 )
 
-// Logger 日志构造体
-type Logger struct {
+func (c ConsoleLogger) enable(loglevel LogLevel) bool {
+	return loglevel >= c.Level
 }
 
-// NewLog 构造函数
-func NewLog() Logger {
-	return Logger{}
+func (c ConsoleLogger) log(lv LogLevel, format string, a ...interface{}) {
+	if c.enable(lv) {
+		msg := fmt.Sprintf(format, a...)
+		now := time.Now()
+		funcName, fileName, lineNo := getINFO(3)
+		fmt.Printf("[%s] [%s] [%s:%s:line%d] %s \n", now.Format("2006-01-02 15:04:05"), getLogString(lv), fileName, funcName, lineNo, msg)
+	}
+
 }
 
 //方法
-func (l Logger) Debug(msg string) {
-	now := time.Now()
-	fmt.Printf("[%s] [Debug] %s \n", now.Format("2006-01-02 15:04:05"), msg)
+func (c ConsoleLogger) DEBUG(format string, a ...interface{}) {
+	c.log(DEBUG, format, a...)
 }
 
-func (l Logger) Info(msg string) {
-	now := time.Now()
-	fmt.Printf("[%s] [Info] %s \n", now.Format("2006-01-02 15:04:05"), msg)
+func (c ConsoleLogger) TRACE(format string, a ...interface{}) {
+	c.log(TRACE, format, a...)
 }
 
-func (l Logger) Warning(msg string) {
-	now := time.Now()
-	fmt.Printf("[%s] [Warning] %s \n", now.Format("2006-01-02 15:04:05"), msg)
+func (c ConsoleLogger) INFO(format string, a ...interface{}) {
+	c.log(INFO, format, a...)
 }
 
-func (l Logger) Error(msg string) {
-	now := time.Now()
-	fmt.Printf("[%s] [Error] %s \n", now.Format("2006-01-02 15:04:05"), msg)
+func (c ConsoleLogger) WARNING(format string, a ...interface{}) {
+	c.log(WARNING, format, a...)
 }
 
-func (l Logger) Fatal(msg string) {
-	now := time.Now()
-	fmt.Printf("[%s] [Fatal] %s \n", now.Format("2006-01-02 15:04:05"), msg)
+func (c ConsoleLogger) ERROR(format string, a ...interface{}) {
+	c.log(ERROR, format, a...)
 }
 
-func (l Logger) Trace(msg string) {
-	now := time.Now()
-	fmt.Printf("[%s] [Trace] %s \n", now.Format("2006-01-02 15:04:05"), msg)
+func (c ConsoleLogger) FATAL(format string, a ...interface{}) {
+	c.log(FATAL, format, a...)
 }
