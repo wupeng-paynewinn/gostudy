@@ -50,8 +50,8 @@ func reflectCheck() {
 	fmt.Println("nil IsNil:", reflect.ValueOf(nil).IsValid())
 
 	b := struct{}{}
-	fmt.Println(reflect.ValueOf(b).FieldByName("abd").IsValid())
-	fmt.Println(reflect.ValueOf(b).MethodByName("abd").IsValid())
+	fmt.Println(reflect.ValueOf(b).FieldByName("abd").IsValid())  //结构体字段查找字段的信息
+	fmt.Println(reflect.ValueOf(b).MethodByName("abd").IsValid()) //结构体字段查找方法的信息
 
 	c := map[string]int{}
 	fmt.Println(reflect.ValueOf(c).MapIndex(reflect.ValueOf("伺机待发")).IsValid())
@@ -80,7 +80,6 @@ func f1() {
 }
 
 func main() {
-
 	f1()
 	reflectCheck()
 }
