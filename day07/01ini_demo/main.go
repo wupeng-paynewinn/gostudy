@@ -119,7 +119,7 @@ func loadIni(fileName string, data interface{}) (err error) {
 				fileObj.SetString(value)
 			case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int64, reflect.Int16:
 				var valueInt int64
-				// ParseInt
+				// ParseInt base:指定进制 bitsSize:无溢出赋值的整数类型 64:int64
 				valueInt, err = strconv.ParseInt(value, 10, 64)
 				if err != nil {
 					err = fmt.Errorf("line:%d syntax error\n", idx+1)
