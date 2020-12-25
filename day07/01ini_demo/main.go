@@ -85,7 +85,7 @@ func loadIni(fileName string, data interface{}) (err error) {
 			}
 		} else {
 			// 	不以"["开头的 就是=分割的键值对
-			if strings.Index(line, "=") == -1 || strings.HasPrefix(line, "=") {
+			if strings.Index(line, "=") == -1 || strings.HasPrefix(line, "=") || strings.HasSuffix(line, "=") {
 				err = fmt.Errorf("line:%d syntax error\n", idx+1)
 				return err
 			}
@@ -112,9 +112,6 @@ func loadIni(fileName string, data interface{}) (err error) {
 				}
 			}
 			//	4 如果key等于tag，给这个字段赋值
-			if len(fieldName) == 0 {
-				continue
-			}
 			fileObj := sValue.FieldByName(fieldName)
 			fmt.Println(fieldName, fileObj.Kind())
 			switch fileObj.Kind() {
@@ -122,6 +119,7 @@ func loadIni(fileName string, data interface{}) (err error) {
 				fileObj.SetString(value)
 			case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int64, reflect.Int16:
 				var valueInt int64
+				// ParseInt
 				valueInt, err = strconv.ParseInt(value, 10, 64)
 				if err != nil {
 					err = fmt.Errorf("line:%d syntax error\n", idx+1)
