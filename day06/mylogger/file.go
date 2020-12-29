@@ -26,6 +26,12 @@ func (f *FileLogger) initFile() error {
 	//日志文件都已经打开了
 	f.fileObj = fileObj
 	f.errFileObj = errFileObj
+	//开启5个后台goroutine往文件里写日志：会出现多个goroutine占用一个文件的情况
+	//for i:=0;i<5;i++{
+	//	go f.writeLogBackground()
+	//}
+	//开启1个后台goroutine往文件里写日志
+	go f.writeLogBackground()
 	return nil
 }
 
@@ -34,6 +40,11 @@ func (f *FileLogger) Close() {
 	f.fileObj.Close()
 	f.errFileObj.Close()
 }
+
+var (
+	// 日志通道的大小
+	MaxChanSize = 50000
+)
 
 // NewFileLogger构造函数
 func NewFileLogger(levelStr, fp, fn string, maxSize int64) *FileLogger {
@@ -46,6 +57,7 @@ func NewFileLogger(levelStr, fp, fn string, maxSize int64) *FileLogger {
 		filePath:    fp,
 		fileName:    fn,
 		maxFileSize: maxSize,
+		logChan:     make(chan *LogMsg, MaxChanSize),
 	}
 	err = fl.initFile()
 	if err != nil {
@@ -99,12 +111,8 @@ func (f *FileLogger) spiltFile(file *os.File) (*os.File, error) {
 	return fileObj, nil
 }
 
-//记录日志
-func (f *FileLogger) log(lv LogLevel, format string, a ...interface{}) {
-	if f.enable(lv) {
-		msg := fmt.Sprintf(format, a...)
-		now := time.Now()
-		funcName, fileName, lineNo := getINFO(3)
+func (f *FileLogger) writeLogBackground() {
+	for {
 		if f.checkSize(f.fileObj) {
 			newFile, err := f.spiltFile(f.fileObj)
 			if err != nil {
@@ -112,18 +120,50 @@ func (f *FileLogger) log(lv LogLevel, format string, a ...interface{}) {
 			}
 			f.fileObj = newFile
 		}
-		fmt.Fprintf(f.fileObj, "[%s] [%s] [%s:%s:line%d] %s \n", now.Format("2006-01-02 15:04:05"), getLogString(lv), fileName, funcName, lineNo, msg)
-		if lv >= ERROR {
-			if f.checkSize(f.errFileObj) {
-				newFile, err := f.spiltFile(f.errFileObj)
-				if err != nil {
-					return
+		select {
+		case logTmp := <-f.logChan:
+			logInfo := fmt.Sprintf("[%s] [%s] [%s:%s:line%d] %s \n", logTmp.Timestamp, getLogString(logTmp.Level), logTmp.FileName, logTmp.funcName, logTmp.Line, logTmp.Msg)
+			fmt.Fprintf(f.fileObj, logInfo)
+			if logTmp.Level >= ERROR {
+				if f.checkSize(f.errFileObj) {
+					newFile, err := f.spiltFile(f.errFileObj)
+					if err != nil {
+						return
+					}
+					f.errFileObj = newFile
 				}
-				f.errFileObj = newFile
+				// 如果记录的日志大于等于error级别，还要再error日志文件中再记录一遍
+				fmt.Fprintf(f.errFileObj, logInfo)
 			}
-			// 如果记录的日志大于等于error级别，还要再error日志文件中再记录一遍
-			fmt.Fprintf(f.errFileObj, "[%s] [%s] [%s:%s:line%d] %s \n", now.Format("2006-01-02 15:04:05"), getLogString(lv), fileName, funcName, lineNo, msg)
+		default:
+			//取不到日志则睡500ms
+			time.Sleep(time.Millisecond * 500)
 		}
+	}
+}
+
+//记录日志
+func (f *FileLogger) log(lv LogLevel, format string, a ...interface{}) {
+	if f.enable(lv) {
+		msg := fmt.Sprintf(format, a...)
+		now := time.Now()
+		funcName, fileName, lineNo := getINFO(3)
+
+		//先把日志放到通道中
+		LogTmp := &LogMsg{
+			Level:     lv,
+			Msg:       msg,
+			funcName:  funcName,
+			FileName:  fileName,
+			Timestamp: now.Format("2006-01-02 15:04:05"),
+			Line:      lineNo,
+		}
+		select {
+		case f.logChan <- LogTmp:
+		default:
+			//满了日志丢掉，保证日志不出现阻塞
+		}
+
 	}
 
 }

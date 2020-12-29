@@ -61,6 +61,15 @@ type FileLogger struct {
 	maxFileSize int64
 	fileObj     *os.File
 	errFileObj  *os.File
+	logChan     chan *LogMsg
+}
+type LogMsg struct {
+	Level     LogLevel
+	Msg       string
+	funcName  string
+	FileName  string
+	Timestamp string
+	Line      int
 }
 
 func parseLogLevel(level string) (LogLevel, error) {

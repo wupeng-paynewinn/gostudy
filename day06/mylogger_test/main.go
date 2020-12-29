@@ -8,8 +8,8 @@ var log mylogger.Logger
 
 //测试自己写的日志库
 func main() {
-	log = mylogger.NewConsoleLog("INFO")                                //终端日志实例
-	log = mylogger.NewFileLogger("INFO", "./", "file.log", 1*1024*1024) //文件日志实例
+	log = mylogger.NewConsoleLog("INFO")                                 //终端日志实例
+	log = mylogger.NewFileLogger("INFO", "./", "file.log", 10*1024*1024) //文件日志实例
 	for {
 		log.DEBUG("This is a DEBUG msg")
 		log.TRACE("This is a TRACE msg")
