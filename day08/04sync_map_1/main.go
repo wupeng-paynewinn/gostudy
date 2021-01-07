@@ -22,3 +22,7 @@ func main() {
 	}
 	wg.Wait()
 }
+
+// syncMap.Delete()
+// syncMap.Range()
+// syncMap.LoadOrStore()

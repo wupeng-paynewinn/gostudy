@@ -1,0 +1,30 @@
+package spilt_string
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestSpilt(t *testing.T) {
+	got := Spilt("abdabdb","b")
+	want := []string{"a","da","d",""}
+	if !reflect.DeepEqual(got,want){
+		t.Errorf("want:%v,but got:%v\n",want,got)
+	}
+}
+
+func TestSpilt2(t *testing.T) {
+	got := Spilt("a:b:c",":")
+	want := []string{"a","b","c"}
+	if !reflect.DeepEqual(got,want){
+		t.Errorf("want:%v,but got:%v\n",want,got)
+	}
+}
+
+func TestSpilt3(t *testing.T) {
+	got := Spilt("hello",":")
+	want := []string{""}
+	if !reflect.DeepEqual(got,want){
+		t.Errorf("want:%v,but got:%v\n",want,got)
+	}
+}
