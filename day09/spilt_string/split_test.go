@@ -35,13 +35,13 @@ func TestSplit(t *testing.T) {
 	}
 
 	teardownTestCase := setupTestCase(t) // 测试之前执行setup操作
-	defer teardownTestCase(t)            // 测试之后执行testdoen操作
+	defer teardownTestCase(t)            // 测试之后执行teardown操作
 
 	for name, tc := range testGroup {
 		t.Run(name, func(t *testing.T) {
 
 			teardownSubTest := setupSubTest(t) // 子测试之前执行setup操作
-			defer teardownSubTest(t)           // 测试之后执行testdoen操作
+			defer teardownSubTest(t)           // 测试之后执行teardown操作
 
 			got := Split(tc.str, tc.sep)
 			if !reflect.DeepEqual(got, tc.want) {
