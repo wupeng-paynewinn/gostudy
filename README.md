@@ -11,7 +11,7 @@ ssh-keygen -t rsa -C "邮箱"
 git init
 git remote add [起的远程分支的名字] [github上的仓库的ssh地址]
 # 把远程origin分支上的内容同步到本地master上
-git pull origin master --allow-unrelated-histories
+git pull master master --allow-unrelated-histories
 
 ```
 #### 3、本地与仓库关联后
